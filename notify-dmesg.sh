@@ -1,6 +1,6 @@
 #!/bin/bash
 # wget -O - https://raw.githubusercontent.com/JimJinn/Linux-public/refs/heads/main/notify-dmesg.sh | bash
-echo "Version 0.11"
+echo "Version 0.12"
 
 # Config file path
 CONFIG_FILE="/etc/notificator/notificator.conf"
@@ -35,6 +35,7 @@ sudo dmesg | grep -iE "error|fail|critical" | sed 's/^\[[^]]*\] //' | while read
         # Publish the error to the MQTT topic
         hostname=$(hostname)
         message="[$hostname] $line"
+        echo "Sending: $line"
         mosquitto_pub -h "$MQTT_SERVER_IP" -t "$NOTIFY_TOPIC" -m "$message"
         
         # Log the error as sent
@@ -50,3 +51,5 @@ sudo dmesg | grep -iE "error|fail|critical" | sed 's/^\[[^]]*\] //' | while read
         fi
     fi
 done
+
+rm -f "$SENT_ERRORS_FILE"
