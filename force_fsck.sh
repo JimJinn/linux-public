@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Version 0.11"
+echo "Version 0.12"
 
 # Check if the required parameters are provided
 if [ -z "$1" ] || [ -z "$2" ]; then
@@ -13,28 +13,33 @@ MOUNTPOINT="$2"
 
 # Function to unmount the device
 unmount_device() {
-    echo "Attempting to unmount $DEVICE..."
-    if sudo umount "$DEVICE"; then
-        echo "$DEVICE successfully unmounted."
-    else
-        echo "Failed to unmount $DEVICE. Checking for processes using it..."
-        lsof_output=$(sudo lsof | grep "$DEVICE")
-        if [ -n "$lsof_output" ]; then
-            echo "The following processes are using $DEVICE:"
-            echo "$lsof_output"
-            echo "Killing processes..."
-            echo "$lsof_output" | awk '{print $2}' | xargs -r sudo kill -9
-            echo "Retrying unmount..."
-            if sudo umount "$DEVICE"; then
-                echo "$DEVICE successfully unmounted after killing processes."
+    echo "Checking if $DEVICE is mounted..."
+    if grep -qs '$DEVICE ' /proc/mounts;; then
+        echo "$DEVICE is mounted. Attempting to unmount..."
+        if sudo umount "$DEVICE"; then
+            echo "$DEVICE successfully unmounted."
+        else
+            echo "Failed to unmount $DEVICE. Checking for processes using it..."
+            lsof_output=$(sudo lsof | grep "$DEVICE")
+            if [ -n "$lsof_output" ]; then
+                echo "The following processes are using $DEVICE:"
+                echo "$lsof_output"
+                echo "Killing processes..."
+                echo "$lsof_output" | awk '{print $2}' | xargs -r sudo kill -9
+                echo "Retrying unmount..."
+                if sudo umount "$DEVICE"; then
+                    echo "$DEVICE successfully unmounted after killing processes."
+                else
+                    echo "Failed to unmount $DEVICE even after killing processes."
+                    exit 1
+                fi
             else
-                echo "Failed to unmount $DEVICE even after killing processes."
+                echo "No processes are using $DEVICE, but unmount still failed."
                 exit 1
             fi
-        else
-            echo "No processes are using $DEVICE, but unmount still failed."
-            exit 1
         fi
+    else
+        echo "$DEVICE is not mounted."
     fi
 }
 
