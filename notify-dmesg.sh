@@ -1,5 +1,5 @@
 #!/bin/bash
-# /usr/local/bin/notificator.sh
+# wget -O - https://raw.githubusercontent.com/JimJinn/Linux-public/refs/heads/main/notify-dmesg.sh | bash
 echo "Version 0.1"
 
 # Config file path
