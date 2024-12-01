@@ -1,13 +1,15 @@
 #!/bin/bash
-echo "Version 0.1"
+echo "Version 0.11"
 
-# Check if the user provided a device
-if [ -z "$1" ]; then
-    echo "Usage: $0 <device> (e.g., /dev/sdb1)"
+# Check if the required parameters are provided
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: $0 <device> <mountpoint>"
+    echo "Example: $0 /dev/sdb1 /mnt/mydisk"
     exit 1
 fi
 
 DEVICE="$1"
+MOUNTPOINT="$2"
 
 # Function to unmount the device
 unmount_device() {
@@ -47,8 +49,28 @@ force_fsck() {
     fi
 }
 
+# Function to mount the device to the specified mount point
+mount_device() {
+    echo "Checking if mount point $MOUNTPOINT exists..."
+    if [ ! -d "$MOUNTPOINT" ]; then
+        echo "Mount point $MOUNTPOINT does not exist. Creating it..."
+        sudo mkdir -p "$MOUNTPOINT"
+    else
+        echo "Mount point $MOUNTPOINT already exists."
+    fi
+
+    echo "Attempting to mount $DEVICE to $MOUNTPOINT..."
+    if sudo mount "$DEVICE" "$MOUNTPOINT"; then
+        echo "$DEVICE successfully mounted at $MOUNTPOINT."
+    else
+        echo "Failed to mount $DEVICE."
+        exit 1
+    fi
+}
+
 # Execute the functions
 unmount_device
 force_fsck
+mount_device
 
-echo "Operation completed for $DEVICE."
+echo "Operation completed for $DEVICE and mounted at $MOUNTPOINT."
