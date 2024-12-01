@@ -1,6 +1,6 @@
 #!/bin/bash
 # wget -O - https://raw.githubusercontent.com/JimJinn/Linux-public/refs/heads/main/notify-dmesg.sh | bash
-echo "Version 0.12"
+echo "Version 0.13"
 
 # Config file path
 CONFIG_FILE="/etc/notificator/notificator.conf"
@@ -30,7 +30,8 @@ if [ ! -f "$SENT_ERRORS_FILE" ]; then
 fi
 
 # Extract unique errors from dmesg
-sudo dmesg | grep -iE "error|fail|critical" | sed 's/^\[[^]]*\] //' | while read -r line; do
+sudo dmesg | grep -iE "error|fail|critical" | sed 's/^\[[^]]*\] //' | sed 's/#\([0-9]\+\)//g' | while read -r line; do
+    echo "Processing line [$line]" 
     # Check if the error has already been sent
     if ! grep -Fxq "$line" "$SENT_ERRORS_FILE"; then
         # Publish the error to the MQTT topic
@@ -50,6 +51,8 @@ sudo dmesg | grep -iE "error|fail|critical" | sed 's/^\[[^]]*\] //' | while read
             echo "Maximum number of messages ($MAX_MESSAGES) reached. Exiting."
             break
         fi
+    else
+        echo "Error already sent: [$line]"
     fi
 done
 
