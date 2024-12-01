@@ -29,7 +29,7 @@ if [ ! -f "$SENT_ERRORS_FILE" ]; then
 fi
 
 # Extract unique errors from dmesg
-dmesg | grep -iE "error|fail|critical" | while read -r line; do
+sudo dmesg | grep -iE "error|fail|critical" | while read -r line; do
     # Check if the error has already been sent
     if ! grep -Fxq "$line" "$SENT_ERRORS_FILE"; then
         # Publish the error to the MQTT topic
