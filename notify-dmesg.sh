@@ -4,6 +4,7 @@ echo "Version 0.12"
 
 # Config file path
 CONFIG_FILE="/etc/notificator/notificator.conf"
+MAX_MESSAGES=5
 
 # Check if the config file exists
 if [ ! -f "$CONFIG_FILE" ]; then
@@ -35,7 +36,7 @@ sudo dmesg | grep -iE "error|fail|critical" | sed 's/^\[[^]]*\] //' | while read
         # Publish the error to the MQTT topic
         hostname=$(hostname)
         message="[$hostname] $line"
-        echo "Sending: $line"
+        echo "Sending to [$NOTIFY_TOPIC]: $line"
         mosquitto_pub -h "$MQTT_SERVER_IP" -t "$NOTIFY_TOPIC" -m "$message"
         
         # Log the error as sent
