@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Version 0.12"
+echo "Version 0.13"
 
 # Check if the required parameters are provided
 if [ -z "$1" ] || [ -z "$2" ]; then
@@ -14,7 +14,7 @@ MOUNTPOINT="$2"
 # Function to unmount the device
 unmount_device() {
     echo "Checking if $DEVICE is mounted..."
-    if grep -qs '$DEVICE ' /proc/mounts;; then
+    if grep -qs '$DEVICE ' /proc/mounts; then
         echo "$DEVICE is mounted. Attempting to unmount..."
         if sudo umount "$DEVICE"; then
             echo "$DEVICE successfully unmounted."
