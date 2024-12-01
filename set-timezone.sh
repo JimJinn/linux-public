@@ -1,4 +1,5 @@
 #!/bin/bash
+# wget -O - https://raw.githubusercontent.com/JimJinn/Linux-public/refs/heads/main/set-timezone.sh | bash
 
 # Set the timezone to Melbourne
 TIMEZONE="Australia/Melbourne"
