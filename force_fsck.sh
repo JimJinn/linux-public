@@ -56,13 +56,13 @@ force_fsck() {
 
 # Function to mount the device to the specified mount point
 mount_device() {
-    echo "Checking if mount point $MOUNTPOINT exists..."
-    if [ ! -d "$MOUNTPOINT" ]; then
-        echo "Mount point $MOUNTPOINT does not exist. Creating it..."
-        sudo mkdir -p "$MOUNTPOINT"
-    else
-        echo "Mount point $MOUNTPOINT already exists."
-    fi
+    # echo "Checking if mount point $MOUNTPOINT exists..."
+    # if [ ! -d "$MOUNTPOINT" ]; then
+    #     echo "Mount point $MOUNTPOINT does not exist. Creating it..."
+    #     sudo mkdir -p "$MOUNTPOINT"
+    # else
+    #     echo "Mount point $MOUNTPOINT already exists."
+    # fi
 
     echo "Attempting to mount $DEVICE to $MOUNTPOINT..."
     if sudo mount "$DEVICE" "$MOUNTPOINT"; then
