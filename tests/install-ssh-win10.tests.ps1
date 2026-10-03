@@ -56,6 +56,34 @@ function Restart-Service { param($Name) }
 function Start-Service { param($Name) }
 function Test-NetConnection { param($ComputerName, $Port, $InformationLevel) return $script:port }
 function Remove-Item { param($LiteralPath, [switch]$Recurse, [switch]$Force) $script:events += 'cleanup' }
+# Exercise the actual OS/architecture gate with mocked Windows version data.
+$preflightStart = $source.IndexOf('    $os = Get-CimInstance')
+$preflight = [scriptblock]::Create($source.Substring($preflightStart, $source.IndexOf('    function Install-SignedPackage') - $preflightStart))
+function Get-CimInstance {
+    param($ClassName)
+    return @{ Caption = 'Mock Windows'; Version = $script:osVersion; BuildNumber = $script:build; ProductType = $script:productType }
+}
+$oldArchitecture = $env:PROCESSOR_ARCHITECTURE
+try {
+    $env:PROCESSOR_ARCHITECTURE = 'AMD64'
+    foreach ($case in @(
+        @{ build = 16299; version = '10.0.16299'; type = 1; allowed = $true },
+        @{ build = 17763; version = '10.0.17763'; type = 1; allowed = $true },
+        @{ build = 19045; version = '10.0.19045'; type = 1; allowed = $true },
+        @{ build = 22000; version = '10.0.22000'; type = 1; allowed = $false },
+        @{ build = 9600; version = '6.3.9600'; type = 1; allowed = $false },
+        @{ build = 17763; version = '10.0.17763'; type = 3; allowed = $false }
+    )) {
+        $script:build = $case.build; $script:osVersion = $case.version; $script:productType = $case.type
+        $threw = $false
+        try { & $preflight } catch {
+            $threw = $true
+            Assert ($_.Exception.Message -match [string]$case.build) 'Rejection must identify detected build'
+        }
+        Assert ($threw -eq (-not $case.allowed)) "OS gate for build $($case.build), product type $($case.type)"
+    }
+} finally { $env:PROCESSOR_ARCHITECTURE = $oldArchitecture }
+
 # Mocked machine PATH already contains OpenSSH; no real environment changes.
 & {
     Reset

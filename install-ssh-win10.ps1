@@ -1,4 +1,4 @@
-# Version: 1.0.0. Run in 64-bit Windows PowerShell 5.1 as Administrator (Windows 10 1809+).
+# Version: 1.0.1. Run in 64-bit Windows PowerShell 5.1 as Administrator (Windows 10).
 # Installs Git and Microsoft Win32-OpenSSH directly; no winget or Windows Update required.
 # Opens inbound TCP 22 and sets Git Bash as the SSH default shell.
 # Sources: https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH-Using-MSI
@@ -11,8 +11,9 @@
         throw 'Run 64-bit Windows PowerShell as Administrator.'
     }
     $os = Get-CimInstance Win32_OperatingSystem
-    if ($os.ProductType -ne 1 -or [int]$os.BuildNumber -lt 17763 -or [int]$os.BuildNumber -ge 22000) {
-        throw 'This installer supports Windows 10 version 1809 or later. Use install-ssh.ps1 on Windows 11.'
+    # The 1809 minimum applies to the DISM feature, not this standalone MSI.
+    if ($os.ProductType -ne 1 -or $os.Version -notlike '10.0.*' -or [int]$os.BuildNumber -lt 10240 -or [int]$os.BuildNumber -ge 22000) {
+        throw "Windows 10 required; detected $($os.Caption), version $($os.Version), build $($os.BuildNumber), product type $($os.ProductType)."
     }
     if (-not [Environment]::Is64BitProcess -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') {
         throw 'This installer requires x64 Windows and 64-bit PowerShell; ARM and x86 are not supported.'
